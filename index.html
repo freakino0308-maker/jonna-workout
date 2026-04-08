@@ -394,10 +394,9 @@ onValue(ref(db,'state'), snap=>{
   if(data){
     ST=data;
     if(!Array.isArray(ST.counts)||ST.counts.length<6) ST.counts=[0,0,0,0,0,0];
-    if(!Array.isArray(ST.photos)||ST.photos.length<6) ST.photos=[[],[],[],[],[],[]];
-    ST.photos=ST.photos.map(p=>Array.isArray(p)?p:[]);
     if(!Array.isArray(ST.logs)||ST.logs.length<6) ST.logs=[[],[],[],[],[],[]];
     ST.logs=ST.logs.map(l=>Array.isArray(l)?l:[]);
+    if(!ST.photos||!Array.isArray(ST.photos)||ST.photos.length<6) ST.photos=[[],[],[],[],[],[]];
   }
   document.getElementById('loading-overlay').classList.add('hide');
   renderAll();
@@ -408,11 +407,7 @@ onValue(ref(db,'history'), snap=>{
   HISTORY=val?(Array.isArray(val)?val:Object.values(val)):[];
 });
 
-// 사진 별도 로드
-loadPhotosFromFB();
-
 function saveToFB(){
-  // photos 제외한 기본 데이터 저장
   const clean={
     counts:ST.counts||[0,0,0,0,0,0],
     logs:ST.logs.map(l=>(l||[])),
@@ -424,23 +419,25 @@ function saveToFB(){
   return set(ref(db,'state'),clean);
 }
 function savePhotoToFB(memberId){
-  // 사진만 멤버별로 따로 저장
   const photos=(ST.photos&&ST.photos[memberId])||[];
-  return set(ref(db,'photos/'+memberId), photos.filter(Boolean));
+  return set(ref(db,'photos/'+memberId), photos.filter(Boolean).length>0 ? photos.filter(Boolean) : null);
 }
 function loadPhotosFromFB(){
-  // 사진 실시간 구독
   MEMBERS.forEach(m=>{
     onValue(ref(db,'photos/'+m.id), snap=>{
-      if(!ST.photos)ST.photos=[[],[],[],[],[],[]];
+      if(!ST.photos||!Array.isArray(ST.photos)||ST.photos.length<6) ST.photos=[[],[],[],[],[],[]];
       ST.photos[m.id]=snap.val()||[];
       renderMembers();
       if(SEL===m.id)renderPanel();
-      renderGallery();
+      const activePage=document.querySelector('.page.on');
+      if(activePage&&activePage.id==='page-gallery')renderGallery();
     });
   });
 }
 function saveHistoryToFB(){ set(ref(db,'history'),HISTORY); }
+
+// 사진 별도 구독 (함수 선언 후 호출)
+loadPhotosFromFB();
 
 function target(){return Math.max(ST.target||1,1);}
 function totalGoal(){return MEMBERS.length*target();}
