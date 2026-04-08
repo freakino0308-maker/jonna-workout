@@ -415,19 +415,65 @@ let ST={counts:[0,0,0,0,0,0],photos:[[],[],[],[],[],[]],logs:[[],[],[],[],[],[]]
 let HISTORY=[];
 let SEL=null,GAL_FILTER=-1,dateOpen=false;
 let saving=false;
+let pendingSave=false;
+let lastSavedJson='';
+const LOCAL_CACHE_KEY='jonna-workout-state-cache-v2';
+const clientId=(crypto&&crypto.randomUUID)?crypto.randomUUID():('client-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+
+function ensureStateShape(data){
+  const next=data&&typeof data==='object'?data:{};
+  if(!Array.isArray(next.counts)||next.counts.length<6)next.counts=[0,0,0,0,0,0];
+  if(!Array.isArray(next.photos)||next.photos.length<6)next.photos=[[],[],[],[],[],[]];
+  if(!Array.isArray(next.logs)||next.logs.length<6)next.logs=[[],[],[],[],[],[]];
+  next.counts=Array.from({length:6},(_,i)=>Number(next.counts[i]||0));
+  next.photos=Array.from({length:6},(_,i)=>Array.isArray(next.photos[i])?next.photos[i].filter(Boolean):[]);
+  next.logs=Array.from({length:6},(_,i)=>Array.isArray(next.logs[i])?next.logs[i]:[]);
+  if(typeof next.weekly!=='number')next.weekly=4;
+  if(typeof next.target!=='number')next.target=16;
+  return next;
+}
+
+function saveLocalCache(){
+  try{localStorage.setItem(LOCAL_CACHE_KEY,JSON.stringify(ST));}catch(e){console.warn('local cache save failed',e);}
+}
+function loadLocalCache(){
+  try{
+    const raw=localStorage.getItem(LOCAL_CACHE_KEY);
+    if(!raw)return null;
+    return ensureStateShape(JSON.parse(raw));
+  }catch(e){
+    console.warn('local cache load failed',e);
+    return null;
+  }
+}
+function renderSyncStatus(msg,isOk=true){
+  const dot=`<span class="sync-dot" style="background:${isOk?'#4caf50':'#ff9800'}"></span>`;
+  const base=(ST.startDate&&ST.endDate)?`${ST.startDate} ~ ${ST.endDate}`:'실시간 연동 중';
+  document.getElementById('hdr-period').innerHTML=`${dot}${msg||base}`;
+}
+
+const cachedState=loadLocalCache();
+if(cachedState)ST=cachedState;
 
 // Firebase 실시간 구독
 onValue(ref(db,'state'), snap=>{
   const data=snap.val();
   if(data){
-    ST=data;
-    // 배열 보정
-    if(!ST.counts||ST.counts.length<6)ST.counts=[0,0,0,0,0,0];
-    if(!ST.photos||ST.photos.length<6)ST.photos=[[],[],[],[],[],[]];
-    if(!ST.logs||ST.logs.length<6)ST.logs=[[],[],[],[],[],[]];
+    const incoming=ensureStateShape(data);
+    const incomingJson=JSON.stringify(incoming);
+    if(incomingJson!==lastSavedJson){
+      ST=incoming;
+      saveLocalCache();
+      renderAll();
+    }
+  }else if(cachedState){
+    ST=ensureStateShape(cachedState);
+    renderAll();
+  }else{
+    ST=ensureStateShape(ST);
+    renderAll();
   }
   document.getElementById('loading-overlay').classList.add('hide');
-  renderAll();
 });
 
 onValue(ref(db,'history'), snap=>{
@@ -436,9 +482,25 @@ onValue(ref(db,'history'), snap=>{
 });
 
 function saveToFB(){
-  if(saving)return;
+  saveLocalCache();
+  if(saving){pendingSave=true;return;}
   saving=true;
-  set(ref(db,'state'),ST).finally(()=>{saving=false;});
+  pendingSave=false;
+  const snapshot=JSON.parse(JSON.stringify({...ST,updatedAt:Date.now(),updatedBy:clientId}));
+  const snapshotJson=JSON.stringify(snapshot);
+  lastSavedJson=snapshotJson;
+  renderSyncStatus('저장 중...');
+  set(ref(db,'state'),snapshot)
+    .then(()=>{renderSyncStatus();})
+    .catch(err=>{
+      console.error(err);
+      renderSyncStatus('로컬에 임시 저장됨',false);
+      alert('저장은 잠시 실패했는데, 이 기기에는 임시 저장해뒀어. 새로고침 후 다시 확인해봐.');
+    })
+    .finally(()=>{
+      saving=false;
+      if(pendingSave)saveToFB();
+    });
 }
 function saveHistoryToFB(){
   set(ref(db,'history'),HISTORY);
@@ -666,12 +728,77 @@ window.chg=function(d){
   saveToFB();
 };
 
-window.addPhotos=function(e){
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=ev=>resolve(ev.target.result);
+    r.onerror=()=>reject(new Error('파일 읽기에 실패했어요.'));
+    r.readAsDataURL(file);
+  });
+}
+
+function compressImage(file,maxSide=1600,quality=0.82){
+  return new Promise((resolve,reject)=>{
+    if(!file.type.startsWith('image/')){reject(new Error('이미지 파일만 업로드할 수 있어요.'));return;}
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let {width,height}=img;
+        const ratio=Math.min(1,maxSide/Math.max(width,height));
+        width=Math.max(1,Math.round(width*ratio));
+        height=Math.max(1,Math.round(height*ratio));
+        const canvas=document.createElement('canvas');
+        canvas.width=width; canvas.height=height;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,width,height);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror=()=>reject(new Error('이미지 변환에 실패했어요.'));
+      img.src=fr.result;
+    };
+    fr.onerror=()=>reject(new Error('파일 읽기에 실패했어요.'));
+    fr.readAsDataURL(file);
+  });
+}
+
+window.addPhotos=async function(e){
   if(SEL===null)return;
   if(!ST.photos)ST.photos=[[],[],[],[],[],[]];
   if(!ST.photos[SEL])ST.photos[SEL]=[];
-  const files=Array.from(e.target.files);let loaded=0;
-  files.forEach(f=>{const r=new FileReader();r.onload=ev=>{ST.photos[SEL].push(ev.target.result);const tgt=target();if(!ST.counts)ST.counts=[0,0,0,0,0,0];if(ST.counts[SEL]<tgt){ST.counts[SEL]=(ST.counts[SEL]||0)+1;if(!ST.logs)ST.logs=[[],[],[],[],[],[]];if(!ST.logs[SEL])ST.logs[SEL]=[];ST.logs[SEL].push({type:'workout'});}loaded++;if(loaded===files.length)saveToFB();};r.readAsDataURL(f);});e.target.value='';
+  const files=Array.from(e.target.files||[]);
+  e.target.value='';
+  if(!files.length)return;
+
+  const btnText=document.querySelector('.upload-txt');
+  if(btnText)btnText.textContent='업로드 처리 중...';
+
+  let successCount=0,failCount=0;
+  for(const file of files){
+    try{
+      const dataUrl=file.size>700*1024?await compressImage(file):await fileToDataURL(file);
+      ST.photos[SEL].push(dataUrl);
+      const tgt=target();
+      if(!ST.counts)ST.counts=[0,0,0,0,0,0];
+      if(ST.counts[SEL]<tgt){
+        ST.counts[SEL]=(ST.counts[SEL]||0)+1;
+        if(!ST.logs)ST.logs=[[],[],[],[],[],[]];
+        if(!ST.logs[SEL])ST.logs[SEL]=[];
+        ST.logs[SEL].push({type:'workout'});
+      }
+      successCount++;
+    }catch(err){
+      console.error(err);
+      failCount++;
+    }
+  }
+
+  renderAll();
+  if(successCount>0)saveToFB();
+  if(btnText)btnText.textContent='탭하여 사진 업로드';
+  if(failCount>0){
+    alert(`사진 ${failCount}장은 업로드에 실패했어. 용량이 너무 크거나 브라우저가 중간에 끊겼을 수 있어.`);
+  }
 };
 
 window.delPhoto=function(i){
