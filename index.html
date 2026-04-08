@@ -66,8 +66,11 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
 .mem-name{font-size:11px;font-weight:700;color:var(--text);}
 .mem-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;min-height:14px;margin-top:1px;}
 .badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:1.5;}
-.badge-top{background:#2a2000;color:#FFD700;border:1px solid #3a3000;}
-.badge-gay{background:#2a0a1a;color:#ff6b9d;border:1px solid #3a1a2a;}
+.badge-1{background:#2a2000;color:#FFD700;border:1px solid #3a3000;}
+.badge-2{background:#1a0a2a;color:#b39ddb;border:1px solid #2a1a3a;}
+.badge-3{background:#0a1a0a;color:#81c784;border:1px solid #1a3a1a;}
+.badge-5{background:#2a0a1a;color:#ff6b9d;border:1px solid #3a1a2a;}
+.badge-6{background:#1a0000;color:#ff4444;border:1px solid #3a0000;}
 .mem-cnt{font-size:20px;font-weight:900;color:var(--fire);line-height:1.1;margin:3px 0 2px;}
 .mem-target{font-size:9px;color:var(--muted);}
 .mini-prog{height:3px;background:#2a2a2a;border-radius:2px;margin-top:6px;}
@@ -124,6 +127,11 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
 .lb-name-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
 .lb-name{font-size:13px;font-weight:700;color:var(--text);}
 .lb-tag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;line-height:1.5;}
+.lb-tag-1,.fine-tag-1{background:#2a2000;color:#FFD700;border:1px solid #3a3000;}
+.lb-tag-2,.fine-tag-2{background:#1a0a2a;color:#b39ddb;border:1px solid #2a1a3a;}
+.lb-tag-3,.fine-tag-3{background:#0a1a0a;color:#81c784;border:1px solid #1a3a1a;}
+.lb-tag-5,.fine-tag-5{background:#2a0a1a;color:#ff6b9d;border:1px solid #3a1a2a;}
+.lb-tag-6,.fine-tag-6{background:#1a0000;color:#ff4444;border:1px solid #3a0000;}
 .lb-tag-top{background:#2a2000;color:#FFD700;border:1px solid #3a3000;}
 .lb-tag-gay{background:#2a0a1a;color:#ff6b9d;border:1px solid #3a1a2a;}
 .lb-sub{font-size:10px;color:var(--muted);margin-top:2px;}
@@ -417,8 +425,41 @@ function totalGoal(){return MEMBERS.length*tgt();}
 function cnt(id){return Math.min(Math.max(ST.counts[id]||0,0),tgt());}
 function miss(id){return Math.max(tgt()-cnt(id),0);}
 function fine(id){return miss(id)*FINE_PER;}
-function getTopSet(){const mx=Math.max(...MEMBERS.map(m=>cnt(m.id)));if(!mx)return new Set();return new Set(MEMBERS.filter(m=>cnt(m.id)===mx).map(m=>m.id));}
-function getGaySet(){const t=tgt(),inc=MEMBERS.filter(m=>cnt(m.id)<t);if(!inc.length)return new Set();const s=[...inc].sort((a,b)=>cnt(a.id)-cnt(b.id));const co=cnt(s[Math.min(1,s.length-1)].id);return new Set(inc.filter(m=>cnt(m.id)<=co).map(m=>m.id));}
+const GRADE_LIST=[
+  {label:'올 라 잇 👑',cls:'badge-1',lbCls:'lb-tag-1'},
+  {label:'정 신 병 🫡',cls:'badge-2',lbCls:'lb-tag-2'},
+  {label:'정 상 인 👏',cls:'badge-3',lbCls:'lb-tag-3'},
+  {label:'정 상 인 👏',cls:'badge-3',lbCls:'lb-tag-3'},
+  {label:'게 이 💅',cls:'badge-5',lbCls:'lb-tag-5'},
+  {label:'십 게 이 👸',cls:'badge-6',lbCls:'lb-tag-6'},
+];
+function getGrade(memberId){
+  // 모두 0이면 전원 십게이
+  const allZero=MEMBERS.every(m=>cnt(m.id)===0);
+  if(allZero)return GRADE_LIST[5];
+
+  // 카운트 기준 내림차순 정렬 후 등급 배정
+  // 동률이면 낮은 등급(뒤 번호) 적용
+  const sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id));
+
+  // 각 멤버의 최종 등급 인덱스 계산
+  // 동률 그룹은 그 그룹이 차지하는 슬롯 중 가장 낮은 등급(높은 인덱스) 사용
+  const gradeMap={};
+  let i=0;
+  while(i<sorted.length){
+    const sameCnt=cnt(sorted[i].id);
+    // 같은 카운트인 멤버 모두 찾기
+    let j=i;
+    while(j<sorted.length&&cnt(sorted[j].id)===sameCnt)j++;
+    // 이 그룹이 차지하는 마지막 슬롯 인덱스 (낮은 등급)
+    const worstIdx=Math.min(j-1,5);
+    for(let k=i;k<j;k++){
+      gradeMap[sorted[k].id]=worstIdx;
+    }
+    i=j;
+  }
+  return GRADE_LIST[gradeMap[memberId]??5];
+}
 function calcWeeks(s,e){if(!s||!e)return 0;const ms=new Date(e)-new Date(s);return ms>0?Math.round(ms/(7*24*3600*1000)):0;}
 function isEnded(){return ST.endDate&&new Date()>new Date(ST.endDate);}
 
@@ -441,8 +482,10 @@ function compressImage(file,maxW=500,q=0.6){
 function buildShareText(){
   const t=tgt(),sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id));
   const period=ST.startDate&&ST.endDate?` (${ST.startDate} ~ ${ST.endDate})`:'';
-  const topSet=getTopSet();
-  return`[운동 현황${period}]\n`+sorted.map((m,i)=>`#${i+1} ${m.name}${topSet.has(m.id)?' 올 라 잇 👑':''}: ${cnt(m.id)}회 / ${t}회`).join('\n');
+  return`[운동 현황${period}]\n`+sorted.map((m,i)=>{
+    const grade=getGrade(m.id);
+    return`#${i+1} ${m.name} ${grade.label}: ${cnt(m.id)}회 / ${t}회`;
+  }).join('\n');
 }
 
 // ─── 날짜 ───
@@ -531,13 +574,10 @@ function renderHeader(){
 }
 
 function renderMembers(){
-  const topSet=getTopSet(),gay=getGaySet();
   document.getElementById('mem-grid').innerHTML=MEMBERS.map(m=>{
-    const c=cnt(m.id),t=tgt(),pct=t>0?Math.round(c/t*100):0,isTop=topSet.has(m.id),isGay=gay.has(m.id);
-    const badges=[];
-    if(isTop)badges.push(`<span class="badge badge-top">올 라 잇 👑</span>`);
-    if(isGay)badges.push(`<span class="badge badge-gay">G A Y 💅</span>`);
-    return`<div class="mem-card${SEL===m.id?' sel':''}${c===t&&t>0?' done':''}${isTop?' top1':''}" onclick="selMem(${m.id})"><div class="mem-av" style="background:${m.color}">${m.init}</div><div class="mem-name">${m.name}</div><div class="mem-badges">${badges.join('')}</div><div class="mem-cnt">${c}</div><div class="mem-target">/ ${t}회</div><div class="mini-prog"><div class="mini-fill" style="width:${pct}%;background:${m.color}"></div></div></div>`;
+    const c=cnt(m.id),t=tgt(),pct=t>0?Math.round(c/t*100):0,grade=getGrade(m.id);
+    const badges=[`<span class="badge ${grade.cls}">${grade.label}</span>`];
+    return`<div class="mem-card${SEL===m.id?' sel':''}${c===t&&t>0?' done':''}" onclick="selMem(${m.id})"><div class="mem-av" style="background:${m.color}">${m.init}</div><div class="mem-name">${m.name}</div><div class="mem-badges">${badges.join('')}</div><div class="mem-cnt">${c}</div><div class="mem-target">/ ${t}회</div><div class="mini-prog"><div class="mini-fill" style="width:${pct}%;background:${m.color}"></div></div></div>`;
   }).join('');
 }
 
@@ -580,25 +620,25 @@ function renderGallery(){
 window.setFilter=function(id){GAL_FILTER=id;renderGallery();};
 
 function renderLB(){
-  const sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id)),topSet=getTopSet(),gay=getGaySet(),t=tgt();
+  const sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id)),t=tgt();
   document.getElementById('lb-body').innerHTML=sorted.map((m,i)=>{
     const c=cnt(m.id),pct=t>0?Math.round(c/t*100):0,rc=i===0?'rank-gold':i===1?'rank-silv':i===2?'rank-brnz':'';
-    const isTop=topSet.has(m.id),isGay=gay.has(m.id);
+    const grade=getGrade(m.id);
     const logs=(ST.logs&&ST.logs[m.id])||[],rc2=logs.filter(l=>l.type==='rest').length,oc=logs.filter(l=>l.type==='overtime').length;
     const sub=[];if(rc2)sub.push(`😴${rc2}`);if(oc)sub.push(`💼${oc}`);
-    const tags=[];if(isTop)tags.push(`<span class="lb-tag lb-tag-top">올 라 잇 👑</span>`);if(isGay)tags.push(`<span class="lb-tag lb-tag-gay">G A Y 💅</span>`);
+    const tags=[`<span class="lb-tag ${grade.lbCls}">${grade.label}</span>`];
     return`<div class="lb-row"><div class="lb-rank ${rc}">${i<3?RANKS[i]:i+1}</div><div class="lb-av" style="background:${m.color}">${m.init}</div><div class="lb-info"><div class="lb-name-row"><span class="lb-name">${m.name}</span>${tags.join('')}</div>${sub.length?`<div class="lb-sub">${sub.join(' · ')}</div>`:''}</div><div class="lb-bar"><div class="lb-fill" style="width:${pct}%"></div></div><div class="lb-num">${c}/${t}</div></div>`;
   }).join('');
 }
 
 function renderFine(){
   const t=tgt(),sorted=[...MEMBERS].sort((a,b)=>fine(b.id)-fine(a.id));
-  const grand=MEMBERS.reduce((a,m)=>a+fine(m.id),0),topSet=getTopSet(),gay=getGaySet();
+  const grand=MEMBERS.reduce((a,m)=>a+fine(m.id),0);
   document.getElementById('fine-grand-total').textContent=grand.toLocaleString();
   document.getElementById('fine-grand-sub').textContent=`총 미달성 ${MEMBERS.reduce((a,m)=>a+miss(m.id),0)}회 × 7,000원`;
   document.getElementById('fine-list').innerHTML=sorted.map(m=>{
-    const f=fine(m.id),ms=miss(m.id),c=cnt(m.id),pct=t>0?Math.round(c/t*100):0,isTop=topSet.has(m.id),isGay=gay.has(m.id);
-    const tags=[];if(isTop)tags.push(`<span class="fine-tag fine-tag-top">올 라 잇 👑</span>`);if(isGay)tags.push(`<span class="fine-tag fine-tag-gay">G A Y 💅</span>`);
+    const f=fine(m.id),ms=miss(m.id),c=cnt(m.id),pct=t>0?Math.round(c/t*100):0,grade=getGrade(m.id);
+    const tags=[`<span class="fine-tag ${grade.lbCls}">${grade.label}</span>`];
     return`<div class="fine-card"><div class="fine-card-hdr"><div class="fine-av" style="background:${m.color}">${m.init}</div><div class="fine-name-wrap"><span class="fine-name">${m.name}</span>${tags.join('')}</div><div class="fine-amount ${f===0?'zero':'nonzero'}">${f===0?'없음 🎉':f.toLocaleString()+'원'}</div></div><div class="fine-detail"><div class="fine-detail-item"><div class="fine-detail-num">${c}</div><div class="fine-detail-lbl">완료</div></div><div class="fine-detail-item"><div class="fine-detail-num" style="color:${ms>0?'#ff6b9d':'var(--fire3)'}">${ms}</div><div class="fine-detail-lbl">미달성</div></div><div class="fine-detail-item"><div class="fine-detail-num">${pct}%</div><div class="fine-detail-lbl">달성률</div></div></div></div>`;
   }).join('');
 }
