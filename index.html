@@ -353,8 +353,8 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyBZ4-6O5nYpJqXfw3E2OlqM-POzhq03F4",
@@ -368,7 +368,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const storage = getStorage(app);
+
 
 const MEMBERS=[
   {id:0,name:'김민규',init:'민규',color:'#FF4500'},
@@ -408,14 +408,37 @@ onValue(ref(db,'history'), snap=>{
   HISTORY=val?(Array.isArray(val)?val:Object.values(val)):[];
 });
 
+// 사진 별도 로드
+loadPhotosFromFB();
+
 function saveToFB(){
-  // photos를 저장할 때 null 제거
+  // photos 제외한 기본 데이터 저장
   const clean={
-    ...ST,
-    photos:ST.photos.map(p=>(p||[]).filter(Boolean)),
-    logs:ST.logs.map(l=>(l||[]))
+    counts:ST.counts||[0,0,0,0,0,0],
+    logs:ST.logs.map(l=>(l||[])),
+    startDate:ST.startDate||'',
+    endDate:ST.endDate||'',
+    weekly:ST.weekly||4,
+    target:ST.target||16,
   };
   return set(ref(db,'state'),clean);
+}
+function savePhotoToFB(memberId){
+  // 사진만 멤버별로 따로 저장
+  const photos=(ST.photos&&ST.photos[memberId])||[];
+  return set(ref(db,'photos/'+memberId), photos.filter(Boolean));
+}
+function loadPhotosFromFB(){
+  // 사진 실시간 구독
+  MEMBERS.forEach(m=>{
+    onValue(ref(db,'photos/'+m.id), snap=>{
+      if(!ST.photos)ST.photos=[[],[],[],[],[],[]];
+      ST.photos[m.id]=snap.val()||[];
+      renderMembers();
+      if(SEL===m.id)renderPanel();
+      renderGallery();
+    });
+  });
 }
 function saveHistoryToFB(){ set(ref(db,'history'),HISTORY); }
 
@@ -429,8 +452,8 @@ function getGaySet(){const tgt=target(),inc=MEMBERS.filter(m=>cnt(m.id)<tgt);if(
 function calcWeeks(s,e){if(!s||!e)return 0;const ms=new Date(e)-new Date(s);if(ms<=0)return 0;return Math.round(ms/(7*24*60*60*1000));}
 function isSeasonEnded(){if(!ST.endDate)return false;return new Date()>new Date(ST.endDate);}
 
-// 이미지 압축 (Storage 업로드 전 전처리)
-function compressImage(file, maxW=1200, quality=0.75){
+// 이미지 압축 (Base64, DB 저장용 - 최대 400px, 품질 0.5 → 약 15~30KB)
+function compressImage(file, maxW=400, quality=0.5){
   return new Promise(res=>{
     const img=new Image();
     const url=URL.createObjectURL(file);
@@ -502,8 +525,6 @@ window.openConfirm=function(){document.getElementById('confirm-modal').classList
 window.closeConfirm=function(){document.getElementById('confirm-modal').classList.remove('show');};
 window.doSeasonSave=async function(){
   closeConfirm();
-
-  // 스냅샷 저장 (사진은 장수만 기록)
   const snapshot={
     savedAt:new Date().toISOString(),
     startDate:ST.startDate,endDate:ST.endDate,
@@ -515,18 +536,6 @@ window.doSeasonSave=async function(){
   if(!Array.isArray(HISTORY))HISTORY=[];
   HISTORY.unshift(snapshot);
   saveHistoryToFB();
-
-  // Storage 사진 전체 삭제
-  const allUrls=(ST.photos||[]).flat().filter(Boolean);
-  if(allUrls.length>0){
-    const prog=document.getElementById('season-end-area');
-    prog.innerHTML=`<div style="padding:14px 16px;font-size:12px;color:var(--muted);text-align:center">🗑️ 사진 정리 중... (${allUrls.length}장)</div>`;
-    await Promise.allSettled(allUrls.map(url=>{
-      try{ return deleteObject(sRef(storage,url)); }catch(e){ return Promise.resolve(); }
-    }));
-  }
-
-  // DB 초기화
   ST.counts=[0,0,0,0,0,0];
   ST.photos=[[],[],[],[],[],[]];
   ST.logs=[[],[],[],[],[],[]];
@@ -589,7 +598,7 @@ function renderMyPhotos(){
   if(SEL===null)return;
   const ph=(ST.photos&&ST.photos[SEL])||[];
   document.getElementById('ph-grid').innerHTML=ph.filter(Boolean).map((url,i)=>
-    `<div class="pthumb" onclick="openModal(${SEL},${i})"><img src="${url}" loading="lazy"><button class="pdel" onclick="event.stopPropagation();delPhoto(${i})">✕</button></div>`
+    `<div class="pthumb" onclick="openModal(${SEL},${i})"><img src="${url}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.opacity='0.3';this.title='로드 실패'"><button class="pdel" onclick="event.stopPropagation();delPhoto(${i})">✕</button></div>`
   ).join('');
 }
 function renderGallery(){
@@ -673,7 +682,7 @@ window.chg=function(d){
   saveToFB();
 };
 
-// ✅ 사진 업로드 - Firebase Storage 사용 (사진 소실 문제 해결)
+// 사진 업로드 - Base64 압축 → Firebase DB 직접 저장
 window.addPhotos=async function(e){
   if(SEL===null)return;
   const files=Array.from(e.target.files);
@@ -682,23 +691,14 @@ window.addPhotos=async function(e){
   const progress=document.getElementById('upload-progress');
   zone.classList.add('uploading');
   progress.textContent=`업로드 중... 0/${files.length}`;
-
   if(!ST.photos)ST.photos=[[],[],[],[],[],[]];
   if(!ST.photos[SEL])ST.photos[SEL]=[];
-
   let done=0;
   for(const file of files){
     try{
-      // 압축
-      const compressed=await compressImage(file);
+      const compressed=await compressImage(file,400,0.5);
       if(!compressed)continue;
-      // Storage에 업로드
-      const filename=`photos/${SEL}/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-      const storageRef=sRef(storage,filename);
-      await uploadString(storageRef,compressed,'data_url');
-      const url=await getDownloadURL(storageRef);
-      // URL만 DB에 저장
-      ST.photos[SEL].push(url);
+      ST.photos[SEL].push(compressed);
       const tgt=target();
       if(!ST.counts)ST.counts=[0,0,0,0,0,0];
       if(ST.counts[SEL]<tgt){
@@ -707,34 +707,25 @@ window.addPhotos=async function(e){
         if(!ST.logs[SEL])ST.logs[SEL]=[];
         ST.logs[SEL].push({type:'workout'});
       }
-      await saveToFB();
       done++;
       progress.textContent=`업로드 중... ${done}/${files.length}`;
     }catch(err){
       console.error('업로드 실패:',err);
-      progress.textContent=`⚠️ 일부 사진 업로드 실패`;
     }
   }
+  // 카운트/로그와 사진을 따로 저장 (용량 분리)
+  await Promise.all([saveToFB(), savePhotoToFB(SEL)]);
   zone.classList.remove('uploading');
-  progress.textContent=done===files.length?`✅ ${done}장 업로드 완료!`:`${done}/${files.length}장 완료`;
+  progress.textContent=`✅ ${done}장 업로드 완료!`;
   setTimeout(()=>{progress.textContent='';},3000);
   e.target.value='';
 };
 
-// ✅ 사진 삭제 - Storage에서도 삭제
-window.delPhoto=async function(i){
+window.delPhoto=function(i){
   if(SEL===null)return;
-  const url=(ST.photos&&ST.photos[SEL]&&ST.photos[SEL][i]);
-  if(url){
-    try{
-      // Storage URL에서 파일 경로 추출 후 삭제
-      const storageRef=sRef(storage,url);
-      await deleteObject(storageRef).catch(()=>{}); // 실패해도 계속
-    }catch(e){}
-  }
   if(ST.photos&&ST.photos[SEL])ST.photos[SEL].splice(i,1);
   if(ST.counts&&ST.counts[SEL]>0){ST.counts[SEL]--;if(ST.logs&&ST.logs[SEL]&&ST.logs[SEL].length)ST.logs[SEL].pop();}
-  saveToFB();
+  Promise.all([saveToFB(), savePhotoToFB(SEL)]);
 };
 
 window.openModal=function(mid,idx){
