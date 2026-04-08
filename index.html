@@ -500,13 +500,40 @@ function renderSeasonEndBanner(){
 }
 window.openConfirm=function(){document.getElementById('confirm-modal').classList.add('show');};
 window.closeConfirm=function(){document.getElementById('confirm-modal').classList.remove('show');};
-window.doSeasonSave=function(){
+window.doSeasonSave=async function(){
   closeConfirm();
-  const snapshot={savedAt:new Date().toISOString(),startDate:ST.startDate,endDate:ST.endDate,weekly:ST.weekly,target:ST.target,counts:[...ST.counts],photoCounts:(ST.photos||[]).map(p=>(p||[]).length),logs:(ST.logs||[]).map(l=>[...l])};
+
+  // 스냅샷 저장 (사진은 장수만 기록)
+  const snapshot={
+    savedAt:new Date().toISOString(),
+    startDate:ST.startDate,endDate:ST.endDate,
+    weekly:ST.weekly,target:ST.target,
+    counts:[...ST.counts],
+    photoCounts:(ST.photos||[]).map(p=>(p||[]).filter(Boolean).length),
+    logs:(ST.logs||[]).map(l=>[...l])
+  };
   if(!Array.isArray(HISTORY))HISTORY=[];
-  HISTORY.unshift(snapshot);saveHistoryToFB();
-  ST.counts=[0,0,0,0,0,0];ST.photos=[[],[],[],[],[],[]];ST.logs=[[],[],[],[],[],[]];ST.startDate='';ST.endDate='';ST.weekly=4;ST.target=16;
-  saveToFB();SEL=null;
+  HISTORY.unshift(snapshot);
+  saveHistoryToFB();
+
+  // Storage 사진 전체 삭제
+  const allUrls=(ST.photos||[]).flat().filter(Boolean);
+  if(allUrls.length>0){
+    const prog=document.getElementById('season-end-area');
+    prog.innerHTML=`<div style="padding:14px 16px;font-size:12px;color:var(--muted);text-align:center">🗑️ 사진 정리 중... (${allUrls.length}장)</div>`;
+    await Promise.allSettled(allUrls.map(url=>{
+      try{ return deleteObject(sRef(storage,url)); }catch(e){ return Promise.resolve(); }
+    }));
+  }
+
+  // DB 초기화
+  ST.counts=[0,0,0,0,0,0];
+  ST.photos=[[],[],[],[],[],[]];
+  ST.logs=[[],[],[],[],[],[]];
+  ST.startDate='';ST.endDate='';ST.weekly=4;ST.target=16;
+  await saveToFB();
+  SEL=null;
+  renderAll();
   const histBtn=document.querySelector('.tab-btn:nth-child(5)');
   switchTab('history',histBtn);
 };
