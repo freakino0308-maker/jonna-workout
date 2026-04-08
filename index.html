@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <title>존나쎈운동방 💥</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -105,8 +104,7 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
 .photo-lbl{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:12px 0 8px;}
 .upload-zone{border:1.5px dashed #333;border-radius:12px;padding:14px;text-align:center;cursor:pointer;position:relative;transition:border-color .2s;}
 .upload-zone:hover{border-color:var(--fire);}
-.upload-zone.uploading{border-color:var(--fire2);animation:blink 1s infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.5;}}
+.upload-zone.uploading{border-color:var(--fire2);}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
 .upload-ico{font-size:20px;display:block;margin-bottom:3px;}
 .upload-txt{font-size:11px;color:var(--muted);}
@@ -115,6 +113,7 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
 .pthumb{aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;cursor:pointer;background:#222;}
 .pthumb img{width:100%;height:100%;object-fit:cover;}
 .pdel{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.75);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.upload-progress{font-size:10px;color:var(--fire);text-align:center;min-height:14px;margin-top:4px;}
 .lb-wrap{margin:0 16px;background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
 .lb-hdr-row{background:var(--dark2);border-bottom:1px solid var(--border);padding:12px 16px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
 .lb-row{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #1e1e1e;}
@@ -172,8 +171,7 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
 .fine-notice{margin:12px 16px 0;background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:11px;color:var(--muted);line-height:1.6;}
 .fine-notice strong{color:var(--fire);}
 .share-wrap{margin:0 16px 12px;}
-.btn-share{width:100%;padding:14px;background:#FAE100;color:#381e1f;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s;}
-.btn-share:active{transform:scale(.98);}
+.btn-share{width:100%;padding:14px;background:#FAE100;color:#381e1f;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:'Noto Sans KR',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;}
 .share-preview{margin-top:10px;background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text);white-space:pre-wrap;line-height:1.8;display:none;}
 .share-preview.show{display:block;}
 .copy-ok{margin-top:8px;font-size:12px;color:#4caf50;font-weight:700;text-align:center;display:none;}
@@ -209,7 +207,6 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
 .confirm-ok{background:linear-gradient(135deg,#b8860b,#FFD700);color:#1a1000;border:none;border-radius:10px;padding:13px;font-size:13px;font-weight:900;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
 .sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#4caf50;margin-right:4px;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.upload-progress{margin-top:6px;font-size:10px;color:var(--fire);text-align:center;min-height:14px;}
 </style>
 </head>
 <body>
@@ -241,10 +238,7 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
   </div>
   <div class="date-panel">
     <div class="date-panel-hdr" onclick="toggleDate()">
-      <div>
-        <div class="date-panel-title">📅 챌린지 기간 설정</div>
-        <div class="date-panel-sub" id="date-panel-sub">탭하여 날짜를 설정하세요</div>
-      </div>
+      <div><div class="date-panel-title">📅 챌린지 기간 설정</div><div class="date-panel-sub" id="date-panel-sub">탭하여 날짜를 설정하세요</div></div>
       <div class="date-toggle" id="date-toggle-btn">열기 ▼</div>
     </div>
     <div class="date-body" id="date-body">
@@ -273,10 +267,7 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
     <div class="sec-label">🔥 멤버 선택</div>
     <div class="mem-grid" id="mem-grid"></div>
     <div class="act-panel" id="act-panel">
-      <div class="act-hdr">
-        <div class="act-av" id="ap-av"></div>
-        <div><div class="act-name" id="ap-name"></div><div class="act-sub" id="ap-sub"></div></div>
-      </div>
+      <div class="act-hdr"><div class="act-av" id="ap-av"></div><div><div class="act-name" id="ap-name"></div><div class="act-sub" id="ap-sub"></div></div></div>
       <div class="cnt-display">
         <div class="cnt-big" id="ap-cnt">0</div>
         <div class="cnt-slash" id="ap-slash">0 / 0 회 완료</div>
@@ -350,25 +341,13 @@ html,body{background:var(--dark);color:var(--text);font-family:'Noto Sans KR',sa
     </div>
   </div>
 </div>
-
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,onValue,set}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBZ4-6O5nYpJqXfw3E2OlqM-POzhq03F4",
-  authDomain: "jonna-workout.firebaseapp.com",
-  databaseURL: "https://jonna-workout-default-rtdb.firebaseio.com",
-  projectId: "jonna-workout",
-  storageBucket: "jonna-workout.firebasestorage.app",
-  messagingSenderId: "752611331234",
-  appId: "1:752611331234:web:bb95a364f5f3b0ac22dbfb"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
+const FC={apiKey:"AIzaSyBZ4-6O5nYpJqXfw3E2OlqM-POzhq03F4",authDomain:"jonna-workout.firebaseapp.com",databaseURL:"https://jonna-workout-default-rtdb.firebaseio.com",projectId:"jonna-workout",storageBucket:"jonna-workout.firebasestorage.app",messagingSenderId:"752611331234",appId:"1:752611331234:web:bb95a364f5f3b0ac22dbfb"};
+const app=initializeApp(FC);
+const db=getDatabase(app);
 
 const MEMBERS=[
   {id:0,name:'김민규',init:'민규',color:'#FF4500'},
@@ -376,92 +355,83 @@ const MEMBERS=[
   {id:2,name:'유재호',init:'재호',color:'#7B2FBE'},
   {id:3,name:'이승언',init:'승언',color:'#0077FF'},
   {id:4,name:'임두용',init:'두용',color:'#00B86B'},
-  {id:5,name:'조성주',init:'성주',color:'#FF8C00'}, // ✅ 조승주→조성주 수정
+  {id:5,name:'조성주',init:'성주',color:'#FF8C00'},
 ];
 const RANKS=['🥇','🥈','🥉'];
 const FINE_PER=7000;
-const ACTION_LABELS={workout:{label:'🔥운동',cls:'workout'},rest:{label:'😴휴식',cls:'rest'},overtime:{label:'💼야근',cls:'overtime'}};
+const AL={workout:{label:'🔥운동',cls:'workout'},rest:{label:'😴휴식',cls:'rest'},overtime:{label:'💼야근',cls:'overtime'}};
 
-let ST={counts:[0,0,0,0,0,0],photos:[[],[],[],[],[],[]],logs:[[],[],[],[],[],[]],startDate:'',endDate:'',weekly:4,target:16};
+// 상태 분리: 메인(카운트/로그/날짜) + 사진(멤버별)
+let ST={counts:[0,0,0,0,0,0],logs:[[],[],[],[],[],[]],startDate:'',endDate:'',weekly:4,target:16};
+let PHOTOS=[[],[],[],[],[],[]]; // 사진 별도 관리
 let HISTORY=[];
-let SEL=null,GAL_FILTER=-1,dateOpen=false;
+let SEL=null,GAL_FILTER=-1,dateOpen=false,loaded=false;
 
-// 사진은 Storage URL 배열로 관리 (DB에 base64 저장 X)
-// ST.photos[id] = [url1, url2, ...] (Storage download URL)
-
-onValue(ref(db,'state'), snap=>{
-  const data=snap.val();
-  if(data){
-    ST=data;
-    if(!Array.isArray(ST.counts)||ST.counts.length<6) ST.counts=[0,0,0,0,0,0];
-    if(!Array.isArray(ST.logs)||ST.logs.length<6) ST.logs=[[],[],[],[],[],[]];
-    ST.logs=ST.logs.map(l=>Array.isArray(l)?l:[]);
-    if(!ST.photos||!Array.isArray(ST.photos)||ST.photos.length<6) ST.photos=[[],[],[],[],[],[]];
+// ─── Firebase 구독 ───
+onValue(ref(db,'state'),snap=>{
+  const d=snap.val();
+  if(d){
+    ST.counts=Array.isArray(d.counts)&&d.counts.length===6?d.counts:[0,0,0,0,0,0];
+    ST.logs=Array.isArray(d.logs)&&d.logs.length===6?d.logs.map(l=>Array.isArray(l)?l:[]):[[],[],[],[],[],[]];
+    ST.startDate=d.startDate||'';
+    ST.endDate=d.endDate||'';
+    ST.weekly=d.weekly||4;
+    ST.target=d.target||16;
   }
-  document.getElementById('loading-overlay').classList.add('hide');
+  if(!loaded){loaded=true;document.getElementById('loading-overlay').classList.add('hide');}
   renderAll();
 });
 
-onValue(ref(db,'history'), snap=>{
-  const val=snap.val();
-  HISTORY=val?(Array.isArray(val)?val:Object.values(val)):[];
+MEMBERS.forEach(m=>{
+  onValue(ref(db,'photos/'+m.id),snap=>{
+    const val=snap.val();
+    PHOTOS[m.id]=Array.isArray(val)?val:(val?Object.values(val):[]);
+    renderMembers();
+    if(SEL===m.id)renderMyPhotos();
+    if(document.getElementById('page-gallery').classList.contains('on'))renderGallery();
+  });
 });
 
-function saveToFB(){
-  const clean={
-    counts:ST.counts||[0,0,0,0,0,0],
-    logs:ST.logs.map(l=>(l||[])),
-    startDate:ST.startDate||'',
-    endDate:ST.endDate||'',
-    weekly:ST.weekly||4,
-    target:ST.target||16,
-  };
-  return set(ref(db,'state'),clean);
-}
-function savePhotoToFB(memberId){
-  const photos=(ST.photos&&ST.photos[memberId])||[];
-  return set(ref(db,'photos/'+memberId), photos.filter(Boolean).length>0 ? photos.filter(Boolean) : null);
-}
-function loadPhotosFromFB(){
-  MEMBERS.forEach(m=>{
-    onValue(ref(db,'photos/'+m.id), snap=>{
-      if(!ST.photos||!Array.isArray(ST.photos)||ST.photos.length<6) ST.photos=[[],[],[],[],[],[]];
-      ST.photos[m.id]=snap.val()||[];
-      renderMembers();
-      if(SEL===m.id)renderPanel();
-      const activePage=document.querySelector('.page.on');
-      if(activePage&&activePage.id==='page-gallery')renderGallery();
-    });
+onValue(ref(db,'history'),snap=>{
+  const v=snap.val();
+  HISTORY=v?(Array.isArray(v)?v:Object.values(v)):[];
+});
+
+// ─── 저장 ───
+function saveST(){
+  return set(ref(db,'state'),{
+    counts:ST.counts,logs:ST.logs,
+    startDate:ST.startDate,endDate:ST.endDate,
+    weekly:ST.weekly,target:ST.target
   });
 }
-function saveHistoryToFB(){ set(ref(db,'history'),HISTORY); }
+function savePhotos(id){
+  const ph=PHOTOS[id]||[];
+  return set(ref(db,'photos/'+id),ph.length>0?ph:null);
+}
+function saveHistory(){set(ref(db,'history'),HISTORY);}
 
-// 사진 별도 구독 (함수 선언 후 호출)
-loadPhotosFromFB();
+// ─── 헬퍼 ───
+function tgt(){return Math.max(ST.target||1,1);}
+function totalGoal(){return MEMBERS.length*tgt();}
+function cnt(id){return Math.min(Math.max(ST.counts[id]||0,0),tgt());}
+function miss(id){return Math.max(tgt()-cnt(id),0);}
+function fine(id){return miss(id)*FINE_PER;}
+function getTopSet(){const mx=Math.max(...MEMBERS.map(m=>cnt(m.id)));if(!mx)return new Set();return new Set(MEMBERS.filter(m=>cnt(m.id)===mx).map(m=>m.id));}
+function getGaySet(){const t=tgt(),inc=MEMBERS.filter(m=>cnt(m.id)<t);if(!inc.length)return new Set();const s=[...inc].sort((a,b)=>cnt(a.id)-cnt(b.id));const co=cnt(s[Math.min(1,s.length-1)].id);return new Set(inc.filter(m=>cnt(m.id)<=co).map(m=>m.id));}
+function calcWeeks(s,e){if(!s||!e)return 0;const ms=new Date(e)-new Date(s);return ms>0?Math.round(ms/(7*24*3600*1000)):0;}
+function isEnded(){return ST.endDate&&new Date()>new Date(ST.endDate);}
 
-function target(){return Math.max(ST.target||1,1);}
-function totalGoal(){return MEMBERS.length*target();}
-function cnt(id){return Math.min(Math.max((ST.counts&&ST.counts[id])||0,0),target());}
-function missing(id){return Math.max(target()-cnt(id),0);}
-function fine(id){return missing(id)*FINE_PER;}
-function getTopSet(){const mx=Math.max(...MEMBERS.map(m=>cnt(m.id)));if(mx===0)return new Set();return new Set(MEMBERS.filter(m=>cnt(m.id)===mx).map(m=>m.id));}
-function getGaySet(){const tgt=target(),inc=MEMBERS.filter(m=>cnt(m.id)<tgt);if(!inc.length)return new Set();const s=[...inc].sort((a,b)=>cnt(a.id)-cnt(b.id));const co=cnt(s[Math.min(1,s.length-1)].id);return new Set(inc.filter(m=>cnt(m.id)<=co).map(m=>m.id));}
-function calcWeeks(s,e){if(!s||!e)return 0;const ms=new Date(e)-new Date(s);if(ms<=0)return 0;return Math.round(ms/(7*24*60*60*1000));}
-function isSeasonEnded(){if(!ST.endDate)return false;return new Date()>new Date(ST.endDate);}
-
-// 이미지 압축 (Base64, DB 저장용 - 최대 400px, 품질 0.5 → 약 15~30KB)
-function compressImage(file, maxW=400, quality=0.5){
+function compressImage(file,maxW=500,q=0.6){
   return new Promise(res=>{
-    const img=new Image();
-    const url=URL.createObjectURL(file);
+    const img=new Image(),url=URL.createObjectURL(file);
     img.onload=()=>{
-      const canvas=document.createElement('canvas');
       let w=img.width,h=img.height;
       if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
-      canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
       URL.revokeObjectURL(url);
-      res(canvas.toDataURL('image/jpeg',quality));
+      res(c.toDataURL('image/jpeg',q));
     };
     img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
     img.src=url;
@@ -469,18 +439,19 @@ function compressImage(file, maxW=400, quality=0.5){
 }
 
 function buildShareText(){
-  const tgt=target(),sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id));
+  const t=tgt(),sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id));
   const period=ST.startDate&&ST.endDate?` (${ST.startDate} ~ ${ST.endDate})`:'';
   const topSet=getTopSet();
-  return`[운동 현황${period}]\n`+sorted.map((m,i)=>`#${i+1} ${m.name}${topSet.has(m.id)?' 올 라 잇 👑':''}: ${cnt(m.id)}회 / ${tgt}회`).join('\n');
+  return`[운동 현황${period}]\n`+sorted.map((m,i)=>`#${i+1} ${m.name}${topSet.has(m.id)?' 올 라 잇 👑':''}: ${cnt(m.id)}회 / ${t}회`).join('\n');
 }
 
+// ─── 날짜 ───
 function updateDatePreview(){
   const s=document.getElementById('inp-start').value,e=document.getElementById('inp-end').value;
-  const w=parseInt(document.getElementById('inp-weekly').value)||4,weeks=calcWeeks(s,e),t=weeks*w;
-  document.getElementById('db-weeks').textContent=weeks||'-';
-  document.getElementById('db-target').textContent=t||'-';
-  document.getElementById('db-total').textContent=t?t*MEMBERS.length:'-';
+  const w=parseInt(document.getElementById('inp-weekly').value)||4,wks=calcWeeks(s,e),t2=wks*w;
+  document.getElementById('db-weeks').textContent=wks||'-';
+  document.getElementById('db-target').textContent=t2||'-';
+  document.getElementById('db-total').textContent=t2?t2*MEMBERS.length:'-';
 }
 window.toggleDate=function(){
   dateOpen=!dateOpen;
@@ -495,54 +466,47 @@ window.applyDate=function(){
   const s=document.getElementById('inp-start').value,e=document.getElementById('inp-end').value,w=parseInt(document.getElementById('inp-weekly').value)||4;
   if(!s||!e){alert('시작일과 종료일을 모두 입력해주세요.');return;}
   if(new Date(e)<=new Date(s)){alert('종료일이 시작일보다 늦어야 해요.');return;}
-  const weeks=calcWeeks(s,e);if(weeks<1){alert('최소 1주 이상 설정해주세요.');return;}
-  ST.startDate=s;ST.endDate=e;ST.weekly=w;ST.target=weeks*w;
+  const wks=calcWeeks(s,e);if(wks<1){alert('최소 1주 이상 설정해주세요.');return;}
+  ST.startDate=s;ST.endDate=e;ST.weekly=w;ST.target=wks*w;
   ST.counts=ST.counts.map(c=>Math.min(c,ST.target));
-  saveToFB();dateOpen=false;
+  saveST();dateOpen=false;
   document.getElementById('date-body').classList.remove('open');
   document.getElementById('date-toggle-btn').textContent='열기 ▼';
 };
-function updateDatePanelSub(){
+
+function updatePeriodUI(){
   if(ST.startDate&&ST.endDate){
-    const weeks=calcWeeks(ST.startDate,ST.endDate);
-    document.getElementById('date-panel-sub').textContent=`${ST.startDate} ~ ${ST.endDate} · ${weeks}주 · 주 ${ST.weekly}회 · 개인 ${ST.target}회`;
-    document.getElementById('hdr-period').innerHTML=`<span class="sync-dot"></span>${ST.startDate} ~ ${ST.endDate} · 주 ${ST.weekly}회 × ${weeks}주`;
+    const wks=calcWeeks(ST.startDate,ST.endDate);
+    document.getElementById('date-panel-sub').textContent=`${ST.startDate} ~ ${ST.endDate} · ${wks}주 · 주 ${ST.weekly}회 · 개인 ${ST.target}회`;
+    document.getElementById('hdr-period').innerHTML=`<span class="sync-dot"></span>${ST.startDate} ~ ${ST.endDate}`;
   }else{
     document.getElementById('date-panel-sub').textContent='탭하여 날짜를 설정하세요';
     document.getElementById('hdr-period').innerHTML=`<span class="sync-dot"></span>실시간 연동 중`;
   }
 }
-function renderSeasonEndBanner(){
+
+function renderSeasonBanner(){
   const el=document.getElementById('season-end-area');
-  if(!ST.startDate||!isSeasonEnded()){el.innerHTML='';return;}
-  const tot=MEMBERS.reduce((a,m)=>a+cnt(m.id),0),tgt=totalGoal(),pct=Math.round(tot/tgt*100);
-  el.innerHTML=`<div class="season-end-banner"><div class="seb-title">🏁 시즌 종료 (${ST.endDate} 마감)</div><div class="seb-desc">기간이 종료됐어요! 달성률 <strong style="color:var(--fire)">${pct}%</strong></div><button class="btn-season-save" onclick="openConfirm()">📋 기록 저장 & 새 시즌 시작</button></div>`;
+  if(!ST.startDate||!isEnded()){el.innerHTML='';return;}
+  const tot=MEMBERS.reduce((a,m)=>a+cnt(m.id),0),pct=Math.round(tot/totalGoal()*100);
+  el.innerHTML=`<div class="season-end-banner"><div class="seb-title">🏁 시즌 종료 (${ST.endDate} 마감)</div><div class="seb-desc">달성률 <strong style="color:var(--fire)">${pct}%</strong></div><button class="btn-season-save" onclick="openConfirm()">📋 기록 저장 & 새 시즌 시작</button></div>`;
 }
+
 window.openConfirm=function(){document.getElementById('confirm-modal').classList.add('show');};
 window.closeConfirm=function(){document.getElementById('confirm-modal').classList.remove('show');};
 window.doSeasonSave=async function(){
   closeConfirm();
-  const snapshot={
-    savedAt:new Date().toISOString(),
-    startDate:ST.startDate,endDate:ST.endDate,
-    weekly:ST.weekly,target:ST.target,
-    counts:[...ST.counts],
-    photoCounts:(ST.photos||[]).map(p=>(p||[]).filter(Boolean).length),
-    logs:(ST.logs||[]).map(l=>[...l])
-  };
+  const snap={savedAt:new Date().toISOString(),startDate:ST.startDate,endDate:ST.endDate,weekly:ST.weekly,target:ST.target,counts:[...ST.counts],photoCounts:PHOTOS.map(p=>p.length),logs:ST.logs.map(l=>[...l])};
   if(!Array.isArray(HISTORY))HISTORY=[];
-  HISTORY.unshift(snapshot);
-  saveHistoryToFB();
-  ST.counts=[0,0,0,0,0,0];
-  ST.photos=[[],[],[],[],[],[]];
-  ST.logs=[[],[],[],[],[],[]];
-  ST.startDate='';ST.endDate='';ST.weekly=4;ST.target=16;
-  await saveToFB();
-  SEL=null;
-  renderAll();
-  const histBtn=document.querySelector('.tab-btn:nth-child(5)');
-  switchTab('history',histBtn);
+  HISTORY.unshift(snap);saveHistory();
+  ST.counts=[0,0,0,0,0,0];ST.logs=[[],[],[],[],[],[]];ST.startDate='';ST.endDate='';ST.weekly=4;ST.target=16;
+  PHOTOS=[[],[],[],[],[],[]];
+  await saveST();
+  await Promise.all(MEMBERS.map(m=>savePhotos(m.id)));
+  SEL=null;renderAll();
+  document.querySelector('.tab-btn:nth-child(5)').click();
 };
+
 window.switchTab=function(name,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
@@ -553,182 +517,182 @@ window.switchTab=function(name,btn){
   if(name==='fine')renderFine();
   if(name==='history')renderHistory();
 };
-function renderAll(){updateDatePanelSub();renderSeasonEndBanner();renderHeader();renderMembers();renderPanel();renderFine();}
+
+function renderAll(){updatePeriodUI();renderSeasonBanner();renderHeader();renderMembers();renderPanel();renderFine();}
+
 function renderHeader(){
-  const tot=MEMBERS.reduce((a,m)=>a+cnt(m.id),0),tgt=totalGoal(),pct=tgt>0?Math.round(tot/tgt*100):0;
+  const tot=MEMBERS.reduce((a,m)=>a+cnt(m.id),0),tg=totalGoal(),pct=tg>0?Math.round(tot/tg*100):0;
   document.getElementById('s-total').textContent=tot;
-  document.getElementById('s-goal').textContent=tgt||'-';
-  document.getElementById('s-remain').textContent=tgt?Math.max(tgt-tot,0):'-';
+  document.getElementById('s-goal').textContent=tg||'-';
+  document.getElementById('s-remain').textContent=tg?Math.max(tg-tot,0):'-';
   const circ=2*Math.PI*25;
   document.getElementById('ring-prog').setAttribute('stroke-dashoffset',(circ-(pct/100)*circ).toFixed(1));
   document.getElementById('ring-pct-txt').textContent=pct+'%';
 }
+
 function renderMembers(){
   const topSet=getTopSet(),gay=getGaySet();
   document.getElementById('mem-grid').innerHTML=MEMBERS.map(m=>{
-    const c=cnt(m.id),tgt=target(),pct=tgt>0?Math.round(c/tgt*100):0,isTop=topSet.has(m.id),isGay=gay.has(m.id);
+    const c=cnt(m.id),t=tgt(),pct=t>0?Math.round(c/t*100):0,isTop=topSet.has(m.id),isGay=gay.has(m.id);
     const badges=[];
     if(isTop)badges.push(`<span class="badge badge-top">올 라 잇 👑</span>`);
     if(isGay)badges.push(`<span class="badge badge-gay">G A Y 💅</span>`);
-    return`<div class="mem-card${SEL===m.id?' sel':''}${c===tgt&&tgt>0?' done':''}${isTop?' top1':''}" onclick="selMem(${m.id})"><div class="mem-av" style="background:${m.color}">${m.init}</div><div class="mem-name">${m.name}</div><div class="mem-badges">${badges.join('')}</div><div class="mem-cnt">${c}</div><div class="mem-target">/ ${tgt}회</div><div class="mini-prog"><div class="mini-fill" style="width:${pct}%;background:${m.color}"></div></div></div>`;
+    return`<div class="mem-card${SEL===m.id?' sel':''}${c===t&&t>0?' done':''}${isTop?' top1':''}" onclick="selMem(${m.id})"><div class="mem-av" style="background:${m.color}">${m.init}</div><div class="mem-name">${m.name}</div><div class="mem-badges">${badges.join('')}</div><div class="mem-cnt">${c}</div><div class="mem-target">/ ${t}회</div><div class="mini-prog"><div class="mini-fill" style="width:${pct}%;background:${m.color}"></div></div></div>`;
   }).join('');
 }
+
 function renderPanel(){
   const p=document.getElementById('act-panel');
   if(SEL===null){p.classList.remove('show');return;}
   p.classList.add('show');
-  const m=MEMBERS[SEL],c=cnt(m.id),tgt=target();
+  const m=MEMBERS[SEL],c=cnt(m.id),t=tgt();
   document.getElementById('ap-av').style.background=m.color;document.getElementById('ap-av').textContent=m.init;
   document.getElementById('ap-name').textContent=m.name;
-  document.getElementById('ap-sub').textContent=`${tgt>0?Math.round(c/tgt*100):0}% 달성 · ${tgt-c}회 남음`;
-  document.getElementById('ap-cnt').textContent=c;document.getElementById('ap-slash').textContent=`${c} / ${tgt} 회 완료`;
-  document.getElementById('ap-prog').style.width=(tgt>0?Math.round(c/tgt*100):0)+'%';
+  document.getElementById('ap-sub').textContent=`${t>0?Math.round(c/t*100):0}% 달성 · ${t-c}회 남음`;
+  document.getElementById('ap-cnt').textContent=c;
+  document.getElementById('ap-slash').textContent=`${c} / ${t} 회 완료`;
+  document.getElementById('ap-prog').style.width=(t>0?Math.round(c/t*100):0)+'%';
   renderLogs();renderMyPhotos();
 }
+
 function renderLogs(){
   if(SEL===null)return;
   const logs=(ST.logs&&ST.logs[SEL])||[],el=document.getElementById('log-tags');
   if(!logs.length){el.innerHTML='<span class="log-empty">아직 기록이 없어요</span>';return;}
-  el.innerHTML=logs.map((l,i)=>{const info=ACTION_LABELS[l.type]||{label:l.type,cls:'workout'};return`<span class="log-tag ${info.cls}">${info.label}<button class="log-tag-del" onclick="delLog(${i})">✕</button></span>`;}).join('');
+  el.innerHTML=logs.map((l,i)=>{const info=AL[l.type]||{label:l.type,cls:'workout'};return`<span class="log-tag ${info.cls}">${info.label}<button class="log-tag-del" onclick="delLog(${i})">✕</button></span>`;}).join('');
 }
+
 function renderMyPhotos(){
   if(SEL===null)return;
-  const ph=(ST.photos&&ST.photos[SEL])||[];
-  document.getElementById('ph-grid').innerHTML=ph.filter(Boolean).map((url,i)=>
-    `<div class="pthumb" onclick="openModal(${SEL},${i})"><img src="${url}" loading="lazy" referrerpolicy="no-referrer" crossorigin="anonymous" onerror="this.style.opacity='0.3';this.title='로드 실패'"><button class="pdel" onclick="event.stopPropagation();delPhoto(${i})">✕</button></div>`
-  ).join('');
+  const ph=PHOTOS[SEL]||[];
+  document.getElementById('ph-grid').innerHTML=ph.map((src,i)=>`<div class="pthumb" onclick="openModal(${SEL},${i})"><img src="${src}"><button class="pdel" onclick="event.stopPropagation();delPhoto(${i})">✕</button></div>`).join('');
 }
+
 function renderGallery(){
-  const totalPh=MEMBERS.reduce((a,m)=>a+((ST.photos&&ST.photos[m.id])||[]).filter(Boolean).length,0);
-  document.getElementById('gal-filter').innerHTML=`<div class="gal-chip${GAL_FILTER===-1?' on':''}" onclick="setFilter(-1)">전체 ${totalPh}</div>`+MEMBERS.map(m=>{const pc=((ST.photos&&ST.photos[m.id])||[]).filter(Boolean).length;return`<div class="gal-chip${GAL_FILTER===m.id?' on':''}" onclick="setFilter(${m.id})" style="${GAL_FILTER===m.id?`background:${m.color};border-color:${m.color};`:''}">${m.name} ${pc}</div>`;}).join('');
+  const totalPh=MEMBERS.reduce((a,m)=>a+(PHOTOS[m.id]||[]).length,0);
+  document.getElementById('gal-filter').innerHTML=`<div class="gal-chip${GAL_FILTER===-1?' on':''}" onclick="setFilter(-1)">전체 ${totalPh}</div>`+MEMBERS.map(m=>{const pc=(PHOTOS[m.id]||[]).length;return`<div class="gal-chip${GAL_FILTER===m.id?' on':''}" onclick="setFilter(${m.id})" style="${GAL_FILTER===m.id?`background:${m.color};border-color:${m.color};`:''}">${m.name} ${pc}</div>`;}).join('');
   const showM=GAL_FILTER===-1?MEMBERS:MEMBERS.filter(m=>m.id===GAL_FILTER);
   let html='',any=false;
-  showM.forEach(m=>{const ph=((ST.photos&&ST.photos[m.id])||[]).filter(Boolean);if(!ph.length)return;any=true;html+=`<div class="gal-member-section"><div class="gal-member-hdr"><div class="gal-av" style="background:${m.color}">${m.init}</div><div class="gal-mem-name">${m.name}</div><div class="gal-mem-cnt">${ph.length}장</div></div><div class="gal-grid">${ph.map((url,i)=>`<div class="gal-thumb" onclick="openModal(${m.id},${i})"><img src="${url}" loading="lazy"></div>`).join('')}</div></div>`;});
+  showM.forEach(m=>{const ph=PHOTOS[m.id]||[];if(!ph.length)return;any=true;html+=`<div class="gal-member-section"><div class="gal-member-hdr"><div class="gal-av" style="background:${m.color}">${m.init}</div><div class="gal-mem-name">${m.name}</div><div class="gal-mem-cnt">${ph.length}장</div></div><div class="gal-grid">${ph.map((src,i)=>`<div class="gal-thumb" onclick="openModal(${m.id},${i})"><img src="${src}" loading="lazy"></div>`).join('')}</div></div>`;});
   if(!any)html=`<div class="gal-empty">아직 인증 사진이 없어요<br>운동하고 사진을 올려보세요! 💪</div>`;
   document.getElementById('gal-body').innerHTML=html;
 }
 window.setFilter=function(id){GAL_FILTER=id;renderGallery();};
+
 function renderLB(){
-  const sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id)),topSet=getTopSet(),gay=getGaySet(),tgt=target();
+  const sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id)),topSet=getTopSet(),gay=getGaySet(),t=tgt();
   document.getElementById('lb-body').innerHTML=sorted.map((m,i)=>{
-    const c=cnt(m.id),pct=tgt>0?Math.round(c/tgt*100):0,rc=i===0?'rank-gold':i===1?'rank-silv':i===2?'rank-brnz':'';
+    const c=cnt(m.id),pct=t>0?Math.round(c/t*100):0,rc=i===0?'rank-gold':i===1?'rank-silv':i===2?'rank-brnz':'';
     const isTop=topSet.has(m.id),isGay=gay.has(m.id);
-    const logs=(ST.logs&&ST.logs[m.id])||[],restCnt=logs.filter(l=>l.type==='rest').length,otCnt=logs.filter(l=>l.type==='overtime').length;
-    const sub=[];if(restCnt)sub.push(`😴${restCnt}`);if(otCnt)sub.push(`💼${otCnt}`);
-    const tags=[];
-    if(isTop)tags.push(`<span class="lb-tag lb-tag-top">올 라 잇 👑</span>`);
-    if(isGay)tags.push(`<span class="lb-tag lb-tag-gay">G A Y 💅</span>`);
-    return`<div class="lb-row"><div class="lb-rank ${rc}">${i<3?RANKS[i]:i+1}</div><div class="lb-av" style="background:${m.color}">${m.init}</div><div class="lb-info"><div class="lb-name-row"><span class="lb-name">${m.name}</span>${tags.join('')}</div>${sub.length?`<div class="lb-sub">${sub.join(' · ')}</div>`:''}</div><div class="lb-bar"><div class="lb-fill" style="width:${pct}%"></div></div><div class="lb-num">${c}/${tgt}</div></div>`;
+    const logs=(ST.logs&&ST.logs[m.id])||[],rc2=logs.filter(l=>l.type==='rest').length,oc=logs.filter(l=>l.type==='overtime').length;
+    const sub=[];if(rc2)sub.push(`😴${rc2}`);if(oc)sub.push(`💼${oc}`);
+    const tags=[];if(isTop)tags.push(`<span class="lb-tag lb-tag-top">올 라 잇 👑</span>`);if(isGay)tags.push(`<span class="lb-tag lb-tag-gay">G A Y 💅</span>`);
+    return`<div class="lb-row"><div class="lb-rank ${rc}">${i<3?RANKS[i]:i+1}</div><div class="lb-av" style="background:${m.color}">${m.init}</div><div class="lb-info"><div class="lb-name-row"><span class="lb-name">${m.name}</span>${tags.join('')}</div>${sub.length?`<div class="lb-sub">${sub.join(' · ')}</div>`:''}</div><div class="lb-bar"><div class="lb-fill" style="width:${pct}%"></div></div><div class="lb-num">${c}/${t}</div></div>`;
   }).join('');
 }
+
 function renderFine(){
-  const tgt=target(),sorted=[...MEMBERS].sort((a,b)=>fine(b.id)-fine(a.id));
-  const grandTotal=MEMBERS.reduce((a,m)=>a+fine(m.id),0),topSet=getTopSet(),gay=getGaySet();
-  document.getElementById('fine-grand-total').textContent=grandTotal.toLocaleString();
-  document.getElementById('fine-grand-sub').textContent=`총 미달성 ${MEMBERS.reduce((a,m)=>a+missing(m.id),0)}회 × 7,000원`;
+  const t=tgt(),sorted=[...MEMBERS].sort((a,b)=>fine(b.id)-fine(a.id));
+  const grand=MEMBERS.reduce((a,m)=>a+fine(m.id),0),topSet=getTopSet(),gay=getGaySet();
+  document.getElementById('fine-grand-total').textContent=grand.toLocaleString();
+  document.getElementById('fine-grand-sub').textContent=`총 미달성 ${MEMBERS.reduce((a,m)=>a+miss(m.id),0)}회 × 7,000원`;
   document.getElementById('fine-list').innerHTML=sorted.map(m=>{
-    const f=fine(m.id),ms=missing(m.id),c=cnt(m.id),pct=tgt>0?Math.round(c/tgt*100):0,isTop=topSet.has(m.id),isGay=gay.has(m.id);
-    const tags=[];
-    if(isTop)tags.push(`<span class="fine-tag fine-tag-top">올 라 잇 👑</span>`);
-    if(isGay)tags.push(`<span class="fine-tag fine-tag-gay">G A Y 💅</span>`);
+    const f=fine(m.id),ms=miss(m.id),c=cnt(m.id),pct=t>0?Math.round(c/t*100):0,isTop=topSet.has(m.id),isGay=gay.has(m.id);
+    const tags=[];if(isTop)tags.push(`<span class="fine-tag fine-tag-top">올 라 잇 👑</span>`);if(isGay)tags.push(`<span class="fine-tag fine-tag-gay">G A Y 💅</span>`);
     return`<div class="fine-card"><div class="fine-card-hdr"><div class="fine-av" style="background:${m.color}">${m.init}</div><div class="fine-name-wrap"><span class="fine-name">${m.name}</span>${tags.join('')}</div><div class="fine-amount ${f===0?'zero':'nonzero'}">${f===0?'없음 🎉':f.toLocaleString()+'원'}</div></div><div class="fine-detail"><div class="fine-detail-item"><div class="fine-detail-num">${c}</div><div class="fine-detail-lbl">완료</div></div><div class="fine-detail-item"><div class="fine-detail-num" style="color:${ms>0?'#ff6b9d':'var(--fire3)'}">${ms}</div><div class="fine-detail-lbl">미달성</div></div><div class="fine-detail-item"><div class="fine-detail-num">${pct}%</div><div class="fine-detail-lbl">달성률</div></div></div></div>`;
   }).join('');
 }
+
 function renderHistory(){
   const el=document.getElementById('history-body');
   const hist=Array.isArray(HISTORY)?HISTORY:[];
   if(!hist.length){el.innerHTML=`<div class="history-empty">아직 저장된 시즌 기록이 없어요<br><br>기간이 종료되면 "기록 저장 & 새 시즌 시작" 버튼이 나타나요 🏁</div>`;return;}
   el.innerHTML=hist.map((h,hi)=>{
-    const tgt=h.target||16,totGoal=MEMBERS.length*tgt,totDone=h.counts.reduce((a,b)=>a+Math.min(b,tgt),0),pct=Math.round(totDone/totGoal*100),weeks=calcWeeks(h.startDate,h.endDate);
+    const t=h.target||16,tg2=MEMBERS.length*t,done=h.counts.reduce((a,b)=>a+Math.min(b,t),0),pct=Math.round(done/tg2*100),wks=calcWeeks(h.startDate,h.endDate);
     const maxC=Math.max(...h.counts),mvpM=MEMBERS[h.counts.indexOf(maxC)];
-    const totalFine=h.counts.reduce((a,c)=>a+Math.max(tgt-Math.min(c,tgt),0)*FINE_PER,0);
-    const sorted=[...MEMBERS].map((m,i)=>({m,c:Math.min(h.counts[i]||0,tgt)})).sort((a,b)=>b.c-a.c);
-    return`<div class="season-card"><div class="season-card-hdr" onclick="toggleSeason(${hi})"><div><div class="season-label">시즌 ${hist.length-hi} · ${h.startDate||'?'} ~ ${h.endDate||'?'}</div><div class="season-meta">${weeks}주 · 주 ${h.weekly||4}회 · 개인 목표 ${tgt}회</div></div><div style="text-align:right"><div class="season-pct">${pct}%</div><div style="font-size:10px;color:var(--muted)" id="stgl-${hi}">▼ 보기</div></div></div><div class="season-body" id="sbody-${hi}"><div class="season-mvp"><div class="season-mvp-av" style="background:${mvpM.color}">${mvpM.init}</div><div><div class="season-mvp-name">올 라 잇 👑 ${mvpM.name}</div><div class="season-mvp-sub">최고 달성 · ${maxC}회</div></div></div><div style="display:flex;flex-direction:column;gap:6px">${sorted.map(({m,c})=>{const pctBar=Math.round(c/tgt*100),mFine=Math.max(tgt-c,0)*FINE_PER;return`<div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:${m.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${m.init}</div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">${m.name}</div><div style="height:5px;background:#222;border-radius:3px;margin-top:3px"><div style="width:${pctBar}%;background:${m.color};height:100%;border-radius:3px;"></div></div></div><div style="text-align:right;min-width:70px"><div style="font-size:12px;font-weight:700;color:var(--text)">${c}/${tgt}</div>${mFine>0?`<div style="font-size:9px;color:#ff6b9d">${mFine.toLocaleString()}원</div>`:`<div style="font-size:9px;color:var(--fire3)">벌금없음</div>`}</div></div>`;}).join('')}</div><div class="season-fine-row"><div class="season-fine-lbl">💸 시즌 총 벌금</div><div class="season-fine-val">${totalFine>0?totalFine.toLocaleString()+'원':'없음 🎉'}</div></div><button class="del-season-btn" onclick="delSeason(${hi})">이 기록 삭제</button></div></div>`;
+    const totalFine=h.counts.reduce((a,c)=>a+Math.max(t-Math.min(c,t),0)*FINE_PER,0);
+    const sorted=[...MEMBERS].map((m,i)=>({m,c:Math.min(h.counts[i]||0,t)})).sort((a,b)=>b.c-a.c);
+    return`<div class="season-card"><div class="season-card-hdr" onclick="toggleSeason(${hi})"><div><div class="season-label">시즌 ${hist.length-hi} · ${h.startDate||'?'} ~ ${h.endDate||'?'}</div><div class="season-meta">${wks}주 · 주 ${h.weekly||4}회 · 개인 목표 ${t}회</div></div><div style="text-align:right"><div class="season-pct">${pct}%</div><div style="font-size:10px;color:var(--muted)" id="stgl-${hi}">▼ 보기</div></div></div><div class="season-body" id="sbody-${hi}"><div class="season-mvp"><div class="season-mvp-av" style="background:${mvpM.color}">${mvpM.init}</div><div><div class="season-mvp-name">올 라 잇 👑 ${mvpM.name}</div><div class="season-mvp-sub">최고 달성 · ${maxC}회</div></div></div><div style="display:flex;flex-direction:column;gap:6px">${sorted.map(({m,c})=>{const pb=Math.round(c/t*100),mf=Math.max(t-c,0)*FINE_PER;return`<div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:${m.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${m.init}</div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">${m.name}</div><div style="height:5px;background:#222;border-radius:3px;margin-top:3px"><div style="width:${pb}%;background:${m.color};height:100%;border-radius:3px"></div></div></div><div style="text-align:right;min-width:70px"><div style="font-size:12px;font-weight:700;color:var(--text)">${c}/${t}</div>${mf>0?`<div style="font-size:9px;color:#ff6b9d">${mf.toLocaleString()}원</div>`:`<div style="font-size:9px;color:var(--fire3)">벌금없음</div>`}</div></div>`;}).join('')}</div><div class="season-fine-row"><div class="season-fine-lbl">💸 시즌 총 벌금</div><div class="season-fine-val">${totalFine>0?totalFine.toLocaleString()+'원':'없음 🎉'}</div></div><button class="del-season-btn" onclick="delSeason(${hi})">이 기록 삭제</button></div></div>`;
   }).join('');
 }
-window.toggleSeason=function(i){const body=document.getElementById('sbody-'+i),tgl=document.getElementById('stgl-'+i);const open=body.classList.toggle('open');tgl.textContent=open?'▲ 닫기':'▼ 보기';};
-window.delSeason=function(i){if(!confirm('이 시즌 기록을 삭제할까요?'))return;HISTORY.splice(i,1);saveHistoryToFB();renderHistory();};
+window.toggleSeason=function(i){const b=document.getElementById('sbody-'+i),t=document.getElementById('stgl-'+i);const o=b.classList.toggle('open');t.textContent=o?'▲ 닫기':'▼ 보기';};
+window.delSeason=function(i){if(!confirm('이 시즌 기록을 삭제할까요?'))return;HISTORY.splice(i,1);saveHistory();renderHistory();};
+
 window.shareKakao=function(){
   const text=buildShareText(),preview=document.getElementById('share-preview'),ok=document.getElementById('copy-ok');
   preview.textContent=text;preview.classList.add('show');ok.classList.remove('show');
   const copy=t=>{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t);return new Promise(res=>{const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0;';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);res();});};
   copy(text).then(()=>{ok.classList.add('show');setTimeout(()=>{ok.classList.remove('show');preview.classList.remove('show');},5000);}).catch(()=>{ok.textContent='위 텍스트를 직접 복사해 주세요!';ok.classList.add('show');});
 };
+
 window.selMem=function(id){SEL=SEL===id?null:id;renderAll();if(SEL!==null)setTimeout(()=>document.getElementById('act-panel').scrollIntoView({behavior:'smooth',block:'nearest'}),80);};
+
 window.logAction=function(type){
-  if(SEL===null)return;const tgt=target();
-  if(!ST.logs)ST.logs=[[],[],[],[],[],[]];
+  if(SEL===null)return;const t=tgt();
   if(!ST.logs[SEL])ST.logs[SEL]=[];
   ST.logs[SEL].push({type});
-  if(!ST.counts)ST.counts=[0,0,0,0,0,0];
-  if(ST.counts[SEL]<tgt)ST.counts[SEL]=(ST.counts[SEL]||0)+1;
-  saveToFB();
-  if(cnt(SEL)===tgt)setTimeout(()=>alert('🎉 '+MEMBERS[SEL].name+' 목표 달성!'),80);
-};
-window.delLog=function(i){
-  if(SEL===null)return;
-  if(ST.logs&&ST.logs[SEL])ST.logs[SEL].splice(i,1);
-  if(ST.counts&&ST.counts[SEL]>0)ST.counts[SEL]--;
-  saveToFB();
-};
-window.chg=function(d){
-  if(SEL===null)return;
-  if(d<0&&ST.logs&&ST.logs[SEL]&&ST.logs[SEL].length>0)ST.logs[SEL].pop();
-  if(!ST.counts)ST.counts=[0,0,0,0,0,0];
-  ST.counts[SEL]=Math.min(Math.max((ST.counts[SEL]||0)+d,0),target());
-  saveToFB();
+  if(ST.counts[SEL]<t)ST.counts[SEL]=(ST.counts[SEL]||0)+1;
+  saveST();
+  if(cnt(SEL)===t)setTimeout(()=>alert('🎉 '+MEMBERS[SEL].name+' 목표 달성!'),80);
 };
 
-// 사진 업로드 - Base64 압축 → Firebase DB 직접 저장
+window.delLog=function(i){
+  if(SEL===null)return;
+  if(ST.logs[SEL])ST.logs[SEL].splice(i,1);
+  if(ST.counts[SEL]>0)ST.counts[SEL]--;
+  saveST();
+};
+
+window.chg=function(d){
+  if(SEL===null)return;
+  if(d<0&&ST.logs[SEL]&&ST.logs[SEL].length>0)ST.logs[SEL].pop();
+  ST.counts[SEL]=Math.min(Math.max((ST.counts[SEL]||0)+d,0),tgt());
+  saveST();
+};
+
 window.addPhotos=async function(e){
   if(SEL===null)return;
   const files=Array.from(e.target.files);
   if(!files.length)return;
   const zone=document.getElementById('upload-zone');
-  const progress=document.getElementById('upload-progress');
+  const prog=document.getElementById('upload-progress');
   zone.classList.add('uploading');
-  progress.textContent=`업로드 중... 0/${files.length}`;
-  if(!ST.photos)ST.photos=[[],[],[],[],[],[]];
-  if(!ST.photos[SEL])ST.photos[SEL]=[];
+  prog.textContent=`업로드 중... 0/${files.length}`;
+  if(!PHOTOS[SEL])PHOTOS[SEL]=[];
   let done=0;
   for(const file of files){
     try{
-      const compressed=await compressImage(file,400,0.5);
+      const compressed=await compressImage(file,500,0.6);
       if(!compressed)continue;
-      ST.photos[SEL].push(compressed);
-      const tgt=target();
-      if(!ST.counts)ST.counts=[0,0,0,0,0,0];
-      if(ST.counts[SEL]<tgt){
+      PHOTOS[SEL].push(compressed);
+      const t=tgt();
+      if(ST.counts[SEL]<t){
         ST.counts[SEL]=(ST.counts[SEL]||0)+1;
-        if(!ST.logs)ST.logs=[[],[],[],[],[],[]];
         if(!ST.logs[SEL])ST.logs[SEL]=[];
         ST.logs[SEL].push({type:'workout'});
       }
       done++;
-      progress.textContent=`업로드 중... ${done}/${files.length}`;
-    }catch(err){
-      console.error('업로드 실패:',err);
-    }
+      prog.textContent=`업로드 중... ${done}/${files.length}`;
+    }catch(err){console.error('압축 오류:',err);}
   }
-  // 카운트/로그와 사진을 따로 저장 (용량 분리)
-  await Promise.all([saveToFB(), savePhotoToFB(SEL)]);
+  // 사진과 카운트 동시 저장
+  await Promise.all([saveST(), savePhotos(SEL)]);
   zone.classList.remove('uploading');
-  progress.textContent=`✅ ${done}장 업로드 완료!`;
-  setTimeout(()=>{progress.textContent='';},3000);
+  prog.textContent=`✅ ${done}장 업로드 완료!`;
+  setTimeout(()=>{prog.textContent='';},3000);
   e.target.value='';
 };
 
 window.delPhoto=function(i){
   if(SEL===null)return;
-  if(ST.photos&&ST.photos[SEL])ST.photos[SEL].splice(i,1);
-  if(ST.counts&&ST.counts[SEL]>0){ST.counts[SEL]--;if(ST.logs&&ST.logs[SEL]&&ST.logs[SEL].length)ST.logs[SEL].pop();}
-  Promise.all([saveToFB(), savePhotoToFB(SEL)]);
+  PHOTOS[SEL].splice(i,1);
+  if(ST.counts[SEL]>0){ST.counts[SEL]--;if(ST.logs[SEL]&&ST.logs[SEL].length)ST.logs[SEL].pop();}
+  Promise.all([saveST(),savePhotos(SEL)]);
 };
 
 window.openModal=function(mid,idx){
-  const url=(ST.photos&&ST.photos[mid]&&ST.photos[mid][idx])||'';
-  document.getElementById('modal-img').src=url;
-  document.getElementById('modal-info').textContent=MEMBERS[mid].name+' 인증사진 '+(idx+1)+'/'+(ST.photos&&ST.photos[mid]?ST.photos[mid].filter(Boolean).length:0);
+  document.getElementById('modal-img').src=PHOTOS[mid][idx]||'';
+  document.getElementById('modal-info').textContent=MEMBERS[mid].name+' 인증사진 '+(idx+1)+'/'+(PHOTOS[mid]||[]).length;
   document.getElementById('modal').classList.add('show');
 };
 window.closeModal=function(){document.getElementById('modal').classList.remove('show');};
