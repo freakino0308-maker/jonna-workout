@@ -394,8 +394,14 @@ MEMBERS.forEach(m=>{
   onValue(ref(db,'photos/'+m.id),snap=>{
     const val=snap.val();
     PHOTOS[m.id]=Array.isArray(val)?val:(val?Object.values(val):[]);
+    // 사진 수가 카운트보다 많으면 사진 수에 맞게 동기화
+    const photoCnt=PHOTOS[m.id].length;
+    if(photoCnt>( ST.counts[m.id]||0)){
+      ST.counts[m.id]=photoCnt;
+      saveST();
+    }
     renderMembers();
-    if(SEL===m.id)renderMyPhotos();
+    if(SEL===m.id){renderPanel();renderMyPhotos();}
     if(document.getElementById('page-gallery').classList.contains('on'))renderGallery();
   });
 });
@@ -422,8 +428,9 @@ function saveHistory(){set(ref(db,'history'),HISTORY);}
 // ─── 헬퍼 ───
 function tgt(){return Math.max(ST.target||1,1);}
 function totalGoal(){return MEMBERS.length*tgt();}
-function cnt(id){return Math.min(Math.max(ST.counts[id]||0,0),tgt());}
-function miss(id){return Math.max(tgt()-cnt(id),0);}
+function cnt(id){return Math.max(ST.counts[id]||0,0);}
+function cntCapped(id){return Math.min(cnt(id),tgt());}
+function miss(id){return Math.max(tgt()-cntCapped(id),0);}
 function fine(id){return miss(id)*FINE_PER;}
 const GRADE_LIST=[
   {label:'올 라 잇 👑',cls:'badge-1',lbCls:'lb-tag-1'},
@@ -575,7 +582,7 @@ function renderHeader(){
 
 function renderMembers(){
   document.getElementById('mem-grid').innerHTML=MEMBERS.map(m=>{
-    const c=cnt(m.id),t=tgt(),pct=t>0?Math.round(c/t*100):0,grade=getGrade(m.id);
+    const c=cnt(m.id),t=tgt(),pct=t>0?Math.min(Math.round(c/t*100),100):0,grade=getGrade(m.id);
     const badges=[`<span class="badge ${grade.cls}">${grade.label}</span>`];
     return`<div class="mem-card${SEL===m.id?' sel':''}${c===t&&t>0?' done':''}" onclick="selMem(${m.id})"><div class="mem-av" style="background:${m.color}">${m.init}</div><div class="mem-name">${m.name}</div><div class="mem-badges">${badges.join('')}</div><div class="mem-cnt">${c}</div><div class="mem-target">/ ${t}회</div><div class="mini-prog"><div class="mini-fill" style="width:${pct}%;background:${m.color}"></div></div></div>`;
   }).join('');
@@ -585,13 +592,14 @@ function renderPanel(){
   const p=document.getElementById('act-panel');
   if(SEL===null){p.classList.remove('show');return;}
   p.classList.add('show');
-  const m=MEMBERS[SEL],c=cnt(m.id),t=tgt();
+  const m=MEMBERS[SEL],c=cnt(m.id),t=tgt(),barPct=Math.min(t>0?Math.round(c/t*100):0,100);
   document.getElementById('ap-av').style.background=m.color;document.getElementById('ap-av').textContent=m.init;
   document.getElementById('ap-name').textContent=m.name;
-  document.getElementById('ap-sub').textContent=`${t>0?Math.round(c/t*100):0}% 달성 · ${t-c}회 남음`;
+  const remain=t-c;
+  document.getElementById('ap-sub').textContent=`${t>0?Math.round(c/t*100):0}% 달성 · ${remain<=0?'목표 초과 달성! 🔥':remain+'회 남음'}`;
   document.getElementById('ap-cnt').textContent=c;
   document.getElementById('ap-slash').textContent=`${c} / ${t} 회 완료`;
-  document.getElementById('ap-prog').style.width=(t>0?Math.round(c/t*100):0)+'%';
+  document.getElementById('ap-prog').style.width=barPct+'%';
   renderLogs();renderMyPhotos();
 }
 
@@ -622,7 +630,7 @@ window.setFilter=function(id){GAL_FILTER=id;renderGallery();};
 function renderLB(){
   const sorted=[...MEMBERS].sort((a,b)=>cnt(b.id)-cnt(a.id)),t=tgt();
   document.getElementById('lb-body').innerHTML=sorted.map((m,i)=>{
-    const c=cnt(m.id),pct=t>0?Math.round(c/t*100):0,rc=i===0?'rank-gold':i===1?'rank-silv':i===2?'rank-brnz':'';
+    const c=cnt(m.id),pct=t>0?Math.min(Math.round(c/t*100),100):0,rc=i===0?'rank-gold':i===1?'rank-silv':i===2?'rank-brnz':'';
     const grade=getGrade(m.id);
     const logs=(ST.logs&&ST.logs[m.id])||[],rc2=logs.filter(l=>l.type==='rest').length,oc=logs.filter(l=>l.type==='overtime').length;
     const sub=[];if(rc2)sub.push(`😴${rc2}`);if(oc)sub.push(`💼${oc}`);
