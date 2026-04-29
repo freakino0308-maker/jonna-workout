@@ -671,7 +671,7 @@ window.logAction=function(type){
   if(SEL===null)return;const t=tgt();
   if(!ST.logs[SEL])ST.logs[SEL]=[];
   ST.logs[SEL].push({type});
-  if(ST.counts[SEL]<t)ST.counts[SEL]=(ST.counts[SEL]||0)+1;
+  ST.counts[SEL]=(ST.counts[SEL]||0)+1;
   saveST();
   if(cnt(SEL)===t)setTimeout(()=>alert('🎉 '+MEMBERS[SEL].name+' 목표 달성!'),80);
 };
@@ -686,7 +686,7 @@ window.delLog=function(i){
 window.chg=function(d){
   if(SEL===null)return;
   if(d<0&&ST.logs[SEL]&&ST.logs[SEL].length>0)ST.logs[SEL].pop();
-  ST.counts[SEL]=Math.min(Math.max((ST.counts[SEL]||0)+d,0),tgt());
+  ST.counts[SEL]=Math.max((ST.counts[SEL]||0)+d,0);
   saveST();
 };
 
@@ -705,12 +705,9 @@ window.addPhotos=async function(e){
       const compressed=await compressImage(file,500,0.6);
       if(!compressed)continue;
       PHOTOS[SEL].push(compressed);
-      const t=tgt();
-      if(ST.counts[SEL]<t){
-        ST.counts[SEL]=(ST.counts[SEL]||0)+1;
-        if(!ST.logs[SEL])ST.logs[SEL]=[];
-        ST.logs[SEL].push({type:'workout'});
-      }
+      ST.counts[SEL]=(ST.counts[SEL]||0)+1;
+      if(!ST.logs[SEL])ST.logs[SEL]=[];
+      ST.logs[SEL].push({type:'workout'});
       done++;
       prog.textContent=`업로드 중... ${done}/${files.length}`;
     }catch(err){console.error('압축 오류:',err);}
